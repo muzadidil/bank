@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; padding-bottom: 80px; font-size: 14px; }
+    .produksi-container { max-width: 900px; margin: auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    
+    .filter-area { position: sticky; top: 0; background: white; z-index: 100; padding: 10px 0; border-bottom: 2px solid #157347; }
+    
+    .table-produksi { width: 100%; margin-top: 10px; border-collapse: collapse; }
+    .table-produksi th { background: #157347; color: white; padding: 10px; text-align: center; }
+    .table-produksi td { padding: 8px; border: 1px solid #dee2e6; vertical-align: middle; }
+    .angka { font-family: monospace; font-weight: bold; color: #157347; text-align: right; }
+
+    .floating-footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #212529; color: white;
+      padding: 12px 20px; display: flex;
+      justify-content: space-between; align-items: center;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.3); z-index: 1000;
+    }
+    .total-box { font-size: 16px; font-weight: bold; color: #2ecc71; }
+    
+    .kategori-select { border-radius: 4px; padding: 2px; font-size: 12px; width: 100%; border: 1px solid #ccc; font-weight: bold; }
+    .loading { text-align: center; padding: 40px; }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid mt-3">
+  <div class="produksi-container">
+    <div class="filter-area">
+      <h6 class="fw-bold mb-3" style="color: #157347;">PENGELUARAN PRODUKSI - <?= bulanAktif ?></h6>
+      <div class="row g-2">
+        <div class="col-7">
+          <input type="text" id="filterKet" class="form-control form-control-sm" placeholder="Cari Keterangan..." onkeyup="applyFilters()">
+        </div>
+        <div class="col-5">
+          <input type="number" id="filterNom" class="form-control form-control-sm" placeholder="Nominal..." onkeyup="applyFilters()">
+        </div>
+      </div>
+    </div>
+
+    <div id="loader" class="loading">
+      <div class="spinner-border" style="color: #157347;" role="status"></div>
+      <p class="small mt-2">Loading Data Produksi...</p>
+    </div>
+
+    <div id="content" style="display:none">
+      <table class="table-produksi">
+        <thead>
+          <tr>
+            <th width="15%">TGL</th>
+            <th width="45%">KETERANGAN</th>
+            <th width="20%">NOMINAL</th>
+            <th width="20%">KATEGORI</th>
+          </tr>
+        </thead>
+        <tbody id="data-tabel"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="floating-footer">
+  <div class="total-box">
+    <span style="font-size: 10px; display: block; color: #fff;">TOTAL PRODUKSI (J1):</span>
+    <span id="label-total">Rp 0</span>
+  </div>
+  <div class="pagination-btns">
+    <button id="btnPrev" class="btn btn-sm btn-outline-light me-1" onclick="changePage(-1)">Prev</button>
+    <span id="pageInfo" class="small mx-2">1</span>
+    <button id="btnNext" class="btn btn-sm btn-outline-light" onclick="changePage(1)">Next</button>
+  </div>
+</div>
+
+<script>
+  let rawData = [];
+  let filteredData = [];
+  let currentPage = 1;
+  const rowsPerPage = 20;
+  const bulan = "<?= bulanAktif ?>";
+
+  window.onload = function() {
+    google.script.run.withSuccessHandler(initData).getSheetData(bulan);
+  };
+
+  function initData(res) {
+    if(res.error) { alert(res.error); return; }
+    rawData = res.transactions;
+    filteredData = [...rawData];
+    
+    const formatter = new Intl.NumberFormat('id-ID');
+    document.getElementById('label-total').innerText = "Rp " + formatter.format(res.totalMaster);
+    
+    renderTable();
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+  }
+
+  function applyFilters() {
+    const ket = document.getElementById('filterKet').value.toLowerCase();
+    const nom = document.getElementById('filterNom').value;
+
+    filteredData = rawData.filter(item => {
+      const matchKet = item.keterangan.toLowerCase().includes(ket);
+      const matchNom = nom === "" || item.nominal.toString().includes(nom);
+      return matchKet && matchNom;
+    });
+
+    currentPage = 1;
+    renderTable();
+  }
+
+  function renderTable() {
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const paginatedItems = filteredData.slice(start, end);
+    
+    const tbody = document.getElementById('data-tabel');
+    const formatter = new Intl.NumberFormat('id-ID');
+    
+    let html = '';
+    paginatedItems.forEach(item => {
+      html += `<tr>
+        <td class="text-center small">${item.tanggal}</td>
+        <td class="small">${item.keterangan}</td>
+        <td class="angka">${formatter.format(item.nominal)}</td>
+        <td>
+          <select class="kategori-select" onchange="doUpdate(this, ${item.baris})">
+            <option value="PRODUKSI" selected>PRODUKSI</option>
+            <option value="PRIBADI">PRIBADI</option>
+            <option value="BANK">BANK</option>
+          </select>
+        </td>
+      </tr>`;
+    });
+
+    tbody.innerHTML = html || '<tr><td colspan="4" class="text-center p-4">Data Kosong</td></tr>';
+    updatePaginationUI();
+  }
+
+  function updatePaginationUI() {
+    const maxPage = Math.ceil(filteredData.length / rowsPerPage) || 1;
+    document.getElementById('pageInfo').innerText = `${currentPage} / ${maxPage}`;
+    document.getElementById('btnPrev').disabled = currentPage === 1;
+    document.getElementById('btnNext').disabled = currentPage === maxPage;
+  }
+
+  function changePage(step) {
+    currentPage += step;
+    renderTable();
+    window.scrollTo(0,0);
+  }
+
+  function doUpdate(el, baris) {
+    const kat = el.value;
+    if(kat === "PRODUKSI") return; // Jika tidak berubah, abaikan
+
+    el.disabled = true;
+    google.script.run.withSuccessHandler(function(res){
+      if(res === "Sukses") {
+        rawData = rawData.filter(item => item.baris !== baris);
+        applyFilters();
+      } else {
+        alert(res);
+        el.disabled = false;
+      }
+    }).updateKategori(baris, kat, bulan);
+  }
+</script>
+</body>
+</html>
