@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <base target="_top">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f0f2f5; font-family: Arial, Helvetica, sans-serif; color: #333; margin: 0; padding: 0; }
+    
+    .bca-container {
+      max-width: 1000px; margin: 20px auto; background: #ffffff; padding: 25px;
+      border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 6px solid #005aa9;
+    }
+
+    .bca-header { border-bottom: 2px solid #005aa9; padding-bottom: 10px; margin-bottom: 20px; }
+    .bca-title { color: #005aa9; font-weight: 700; font-size: 1.1rem; text-transform: uppercase; margin: 0; }
+
+    /* Gaya Tabel BCA */
+    .table-bca { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .table-bca th { background-color: #005aa9; color: #ffffff; padding: 10px; border: 1px solid #004a8b; font-weight: 600; text-transform: uppercase; text-align: center; }
+    .table-bca td { padding: 10px; border: 1px solid #dddddd; vertical-align: top; word-break: break-word; }
+    
+    /* Efek Zebra */
+    .table-bca tbody tr:nth-child(even) { background-color: #f8fafd; }
+    .table-bca tbody tr:hover { background-color: #eef4fb; }
+
+    /* Font Angka Bank (Sejajar) */
+    .angka { font-family: 'Courier New', Courier, monospace; font-weight: 600; white-space: nowrap; font-size: 0.85rem; }
+    .text-db { color: #ef4444; } /* Merah Debet */
+    .text-cr { color: #22c55e; } /* Hijau Kredit */
+
+    .loading { text-align: center; padding: 50px; color: #005aa9; font-weight: bold; }
+
+    /* Responsif Mobile */
+    @media (max-width: 768px) {
+      .bca-container { margin: 5px; padding: 10px; border-radius: 4px; }
+      .table-bca { font-size: 0.68rem; }
+      .table-bca th, .table-bca td { padding: 6px 3px; }
+      .angka { font-size: 0.68rem; }
+      .bca-title { font-size: 0.9rem; }
+      .logo-bca { width: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="bca-container">
+      
+      <div class="bca-header d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="bca-title">Mutasi Rekening</h1>
+          <small class="text-muted"><?= judulTampilan ?></small>
+        </div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bank_Central_Asia.svg/1024px-Bank_Central_Asia.svg.png" class="logo-bca" width="90">
+      </div>
+      
+      <div id="loader" class="loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div><br>
+        <span class="mt-2 d-block small">Mengsinkronkan Data...</span>
+      </div>
+
+      <div class="table-responsive" style="display:none; border: none;" id="table-area">
+        <table class="table-bca">
+          <thead>
+            <tr>
+              <th width="10%">TGL</th>
+              <th width="45%">KETERANGAN</th>
+              <th class="text-end" width="15%">DEBET</th>
+              <th class="text-end" width="15%">KREDIT</th>
+              <th class="text-end" width="15%">SALDO</th>
+            </tr>
+          </thead>
+          <tbody id="data-tabel"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Ambil data saat halaman load
+    window.onload = function() {
+      // BAGIAN DINAMIS: Mengirim nama sheet asli ke server
+      var targetSheet = "<?= namaSheetDinamis ?>";
+      google.script.run.withSuccessHandler(showData).getSheetData(targetSheet);
+    };
+
+    function showData(data) {
+      const tbody = document.getElementById('data-tabel');
+      const formatUang = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val || 0);
+
+      if (typeof data === 'string') {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">${data}</td></tr>`;
+      } else {
+        let html = '';
+        data.forEach(item => {
+          html += `
+          <tr>
+            <td class="text-center">${item.tanggal}</td>
+            <td>${item.keterangan}</td>
+            <td class="text-end angka text-db">${item.debet > 0 ? formatUang(item.debet) : '0,00'}</td>
+            <td class="text-end angka text-cr">${item.kredit > 0 ? formatUang(item.kredit) : '0,00'}</td>
+            <td class="text-end angka" style="color: #005aa9;">${formatUang(item.saldo)}</td>
+          </tr>`;
+        });
+        tbody.innerHTML = html;
+      }
+
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('table-area').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
