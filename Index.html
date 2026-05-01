@@ -9,9 +9,17 @@
   <style>
     :root { --bca-blue: #005aa9; --bca-light: #f0f4f8; --bca-gold: #f9d923; }
     body { background-color: var(--bca-light); font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; padding-bottom: 95px; }
-    .nav-zasha { background: var(--bca-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-    .nav-link { color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; padding: 10px 5px; border-radius: 0; font-size: 11px; }
-    .nav-link.active { color: #fff !important; background: rgba(255,255,255,0.1) !important; border-bottom: 3px solid var(--bca-gold); }
+    
+    /* NAV BAR BARU */
+    .nav-zasha { background: var(--bca-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.2); padding: 10px; display: flex; gap: 10px; }
+    .nav-zasha .dropdown { flex: 1; }
+    .nav-zasha .btn-dropdown-zasha { 
+      background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); 
+      width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 11px; text-transform: uppercase;
+    }
+    .nav-zasha .btn-dropdown-zasha:hover, .nav-zasha .btn-dropdown-zasha:focus { background: rgba(255,255,255,0.2); color: var(--bca-gold); }
+    .dropdown-item.active { background-color: var(--bca-blue); color: #fff; }
+    
     .bca-card { background: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 5px solid var(--bca-blue); margin-top: 10px; }
     .table-bca thead { background-color: var(--bca-blue); color: #fff; }
     .angka { font-family: 'Courier New', Courier, monospace; font-weight: bold; text-align: right; }
@@ -49,12 +57,52 @@
   </div>
 </div>
 
-<nav class="nav nav-pills nav-justified nav-zasha">
-  <a class="nav-link <?= page=='bank'?'active':'' ?>" href="<?= url ?>?p=bank&bulan=<?= bulan ?>">Mutasi</a>
-  <a class="nav-link <?= page=='kosong'?'active':'' ?>" href="<?= url ?>?p=kosong&bulan=<?= bulan ?>">Kosong</a>
-  <a class="nav-link <?= page=='pribadi'?'active':'' ?>" href="<?= url ?>?p=pribadi&bulan=<?= bulan ?>">Pribadi</a>
-  <a class="nav-link <?= page=='produksi'?'active':'' ?>" href="<?= url ?>?p=produksi&bulan=<?= bulan ?>">Produksi</a>
-</nav>
+<!-- UBAH: Navigasi Dropdown Ganda -->
+<div class="nav-zasha">
+  
+  <!-- Dropdown Kategori -->
+  <div class="dropdown">
+    <button class="btn btn-dropdown-zasha fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <span><i class="bi bi-tags-fill me-1"></i> <?= judul ?></span>
+      <i class="bi bi-chevron-down"></i>
+    </button>
+    <ul class="dropdown-menu shadow w-100" style="font-size: 12px;">
+      <li><a class="dropdown-item <?= page=='bank'?'active':'' ?>" href="<?= url ?>?p=bank&bulan=<?= bulan ?>">🏦 Mutasi Bank</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item <?= page=='kosong'?'active':'' ?>" href="<?= url ?>?p=kosong&bulan=<?= bulan ?>">📄 Belum Kategori (Kosong)</a></li>
+      <li><a class="dropdown-item <?= page=='pribadi'?'active':'' ?>" href="<?= url ?>?p=pribadi&bulan=<?= bulan ?>">👤 Pribadi</a></li>
+      <li><a class="dropdown-item <?= page=='produksi'?'active':'' ?>" href="<?= url ?>?p=produksi&bulan=<?= bulan ?>">🏭 Produksi</a></li>
+      <li><a class="dropdown-item <?= page=='exspedisi'?'active':'' ?>" href="<?= url ?>?p=exspedisi&bulan=<?= bulan ?>">🚚 Exspedisi</a></li>
+      <li><a class="dropdown-item <?= page=='v_sales'?'active':'' ?>" href="<?= url ?>?p=v_sales&bulan=<?= bulan ?>">💼 V_Sales</a></li>
+      <li><a class="dropdown-item <?= page=='operasional'?'active':'' ?>" href="<?= url ?>?p=operasional&bulan=<?= bulan ?>">⚙️ Operasional</a></li>
+      <li><a class="dropdown-item <?= page=='nurul_aini'?'active':'' ?>" href="<?= url ?>?p=nurul_aini&bulan=<?= bulan ?>">👩 Nurul Aini</a></li>
+    </ul>
+  </div>
+
+  <!-- Dropdown Bulan -->
+  <div class="dropdown">
+    <button class="btn btn-dropdown-zasha fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <span><i class="bi bi-calendar3 me-1"></i> Maret</span>
+      <i class="bi bi-chevron-down"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow w-100" style="font-size: 12px; max-height: 300px; overflow-y: auto;">
+      <li><a class="dropdown-item" href="#">Januari</a></li>
+      <li><a class="dropdown-item" href="#">Februari</a></li>
+      <li><a class="dropdown-item active" href="#">Maret</a></li>
+      <li><a class="dropdown-item" href="#">April</a></li>
+      <li><a class="dropdown-item" href="#">Mei</a></li>
+      <li><a class="dropdown-item" href="#">Juni</a></li>
+      <li><a class="dropdown-item" href="#">Juli</a></li>
+      <li><a class="dropdown-item" href="#">Agustus</a></li>
+      <li><a class="dropdown-item" href="#">September</a></li>
+      <li><a class="dropdown-item" href="#">Oktober</a></li>
+      <li><a class="dropdown-item" href="#">November</a></li>
+      <li><a class="dropdown-item" href="#">Desember</a></li>
+    </ul>
+  </div>
+
+</div>
+<!-- AKHIR UBAH -->
 
 <div class="action-bar">
   <div class="input-group input-group-sm"><span class="input-group-text bg-white border-end-0">🔍</span><input type="text" id="searchInput" class="form-control border-start-0" placeholder="Cari..." onkeyup="filterData()"></div>
@@ -108,7 +156,7 @@
   <!-- Tengah: Tombol Melayang -->
   <div>
     <a href="https://alfan.zasha.online/bulan/maret.php" class="btn-floating shadow-sm">
-      <i class="bi bi-house-door"></i> DASHBOARD UTAMA
+      <i class="bi bi-house-door"></i> DASHBOARD
     </a>
   </div>
 
@@ -125,9 +173,7 @@
   let rawData = [], filteredData = [], currentPage = 1, rowsPerPage = 20, currentTotal = 0;
   const pageType = "<?= page ?>", bulan = "<?= bulan ?>";
   
-  // Variabel untuk menyimpan tag <option> agar tidak dirender berulang-ulang dari nol
   let optionKategoriHtml = '';
-  // Daftar kategori utama Zasha (tetap muncul meskipun belum ada di Sheet)
   const masterKategori = ["PRIBADI", "PRODUKSI", "EXSPEDISI", "V_SALES", "OPERASIONAL", "NURUL_AINI", "BANK"];
 
   window.onload = function() { google.script.run.withSuccessHandler(initData).getDataFromSheet(pageType, bulan); };
@@ -138,13 +184,8 @@
       return;
     }
 
-    // Menggabungkan kategori utama dengan kategori unik yang ada di sheet
     let gabunganKategori = [...new Set([...masterKategori, ...(res.categories || [])])];
-    
-    // Siapkan HTML untuk opsi dropdown
     optionKategoriHtml = gabunganKategori.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-    
-    // Isi dropdown update massal
     document.getElementById('bulkKategori').innerHTML = optionKategoriHtml;
     
     if (pageType === 'bank') {
@@ -175,7 +216,6 @@
         if (pageType === 'bank') {
           html += `<tr><td class="text-center">${item.tanggal}</td><td style="font-size:11px">${item.keterangan}</td><td class="angka text-danger">${fmt.format(item.debet)}</td><td class="angka text-success">${fmt.format(item.kredit)}</td><td class="angka text-primary">${fmt.format(item.saldo)}</td></tr>`;
         } else {
-          // UBAH: Mengganti tombol pindah dengan Dropdown Select (form-select)
           html += `<tr>
             <td class="text-center"><input type="checkbox" class="rowCheck" value="${item.baris}" onclick="updateCount()"></td>
             <td class="text-center">${item.tanggal}</td><td style="font-size:11px">${item.keterangan}</td><td class="angka text-danger">${fmt.format(item.nominal)}</td>
@@ -219,16 +259,14 @@
     }).updateBatchKategori(selected, target, bulan, pageType);
   }
 
-  // UBAH: singleUpdate sekarang menerima parameter kedua yaitu kategori tujuan (target)
   function singleUpdate(baris, targetKategori) {
-    if(!targetKategori) return; // Mencegah eksekusi jika tidak ada kategori yang dipilih
+    if(!targetKategori) return; 
     
     document.getElementById('content').style.opacity = "0.5";
     google.script.run.withSuccessHandler(function(res){
       document.getElementById('toastMessage').innerText = res.message;
       new bootstrap.Toast(document.getElementById('liveToast')).show();
       
-      // Hapus data dari list karena sudah dipindah
       rawData = rawData.filter(i => i.baris !== baris);
       filteredData = [...rawData];
       currentTotal = res.newTotal;
